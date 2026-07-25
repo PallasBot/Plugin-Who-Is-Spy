@@ -8,6 +8,7 @@ from pallas.api.metadata import (
     join_usage,
     usage_line,
 )
+from pallas.api.platform import llm_command_tool_row
 from pallas.product.llm.knowledge.declare import knowledge_source_row
 
 from . import handlers as _handlers  # noqa: F401
@@ -62,6 +63,50 @@ __plugin_meta__ = PluginMetadata(
             },
             {"id": "who_is_spy.status", "label": CMD_STATUS, "default": "everyone"},
             {"id": "who_is_spy.end", "label": CMD_END, "default": "everyone"},
+        ],
+        "llm_tools": [
+            llm_command_tool_row(
+                name="who_is_spy.open",
+                command_id="who_is_spy.open",
+                description="开一局谁是卧底房间。用户要玩卧底、开房时使用。",
+                parameters={"type": "object", "properties": {}},
+                command_template="牛牛卧底",
+            ),
+            llm_command_tool_row(
+                name="who_is_spy.join",
+                command_id="who_is_spy.join",
+                description="加入筹备中的卧底房间。",
+                parameters={"type": "object", "properties": {}},
+                command_template="牛牛加入",
+            ),
+            llm_command_tool_row(
+                name="who_is_spy.start",
+                command_id="who_is_spy.start",
+                description="房主发身份开局。用户说发身份、开始时使用。",
+                parameters={"type": "object", "properties": {}},
+                command_template="牛牛发身份",
+            ),
+            llm_command_tool_row(
+                name="who_is_spy.vote",
+                command_id="who_is_spy.start",
+                description="房主提前开始投票。",
+                parameters={"type": "object", "properties": {}},
+                command_template="牛牛投票",
+            ),
+            llm_command_tool_row(
+                name="who_is_spy.status",
+                command_id="who_is_spy.status",
+                description="查看当前卧底局势。",
+                parameters={"type": "object", "properties": {}},
+                command_template="牛牛局势",
+            ),
+            llm_command_tool_row(
+                name="who_is_spy.end",
+                command_id="who_is_spy.end",
+                description="结束当前卧底房间。",
+                parameters={"type": "object", "properties": {}},
+                command_template="牛牛结束",
+            ),
         ],
         "hosted_activity_ingress": {
             "plugin_key": "who_is_spy",
