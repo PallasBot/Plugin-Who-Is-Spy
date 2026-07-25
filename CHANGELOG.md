@@ -5,8 +5,12 @@
 
 ## [Unreleased]
 
+
+## [$new] - $TODAY
+
 - fix(deliver): 发词/投票说明优先群临时会话（`group_id`），再好友私聊与邮箱
 - fix(vote): 私聊投票回复与对局匹配支持群临时会话 `group_id`
+- chore(ci): 对齐 ruff 0.16 与主仓 ruff.toml，修复 lint
 
 ## [4.0.12] - 2026-07-13
 
