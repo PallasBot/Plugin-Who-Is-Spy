@@ -1,11 +1,8 @@
 from nonebot.plugin import PluginMetadata
-
 from pallas.api.metadata import (
     PLUGIN_EXTRA_VERSION,
     PLUGIN_HOMEPAGE,
     PLUGIN_MENU_TEMPLATE,
-)
-from pallas.api.metadata import (
     SCENE_GROUP,
     SCENE_PRIVATE,
     join_usage,
@@ -13,6 +10,7 @@ from pallas.api.metadata import (
 )
 from pallas.product.llm.knowledge.declare import knowledge_source_row
 
+from . import handlers as _handlers  # noqa: F401
 from .commands import (
     CMD_END,
     CMD_JOIN,
@@ -28,20 +26,15 @@ from .store import init_store
 
 init_store()
 
-from . import handlers as _handlers  # noqa: E402, F401
 
 __plugin_meta__ = PluginMetadata(
     name="牛牛卧底",
-    description=(
-        "谁是卧底：房主开房、玩家 @牛牛 述词，全员述完自动或房主发起私聊投票，直至平民或卧底一方获胜。"
-    ),
+    description=("谁是卧底：房主开房、玩家 @牛牛 述词，全员述完自动或房主发起私聊投票，直至平民或卧底一方获胜。"),
     usage=join_usage(
         usage_line(CMD_OPEN, "房主开房间"),
         usage_line("牛牛谁是卧底", "同「牛牛卧底」"),
         usage_line(f"{CMD_JOIN} / {CMD_QUIT}", "加入或退出筹备中的房间"),
-        usage_line(
-            f"{CMD_START} / 牛牛开始 [潜藏人数] [白板] [暗牌|明牌]", "房主发词牌并开始"
-        ),
+        usage_line(f"{CMD_START} / 牛牛开始 [潜藏人数] [白板] [暗牌|明牌]", "房主发词牌并开始"),
         usage_line("@牛牛 + 描述", "讨论阶段记为述词"),
         usage_line(CMD_VOTE, "房主提前开始投票"),
         usage_line("私聊回复数字或 0", "投票"),
@@ -215,10 +208,7 @@ __plugin_meta__ = PluginMetadata(
                     },
                     {
                         "title": "局势与结束",
-                        "content": (
-                            "「牛牛局势」查看当前轮次与名单；"
-                            "房主或群管可发「牛牛结束」结束对局。"
-                        ),
+                        "content": ("「牛牛局势」查看当前轮次与名单；房主或群管可发「牛牛结束」结束对局。"),
                         "keywords": "局势,结束,状态,房间",
                     },
                 ],

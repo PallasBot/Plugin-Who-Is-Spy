@@ -4,10 +4,10 @@ from typing import Literal
 
 from pallas.api.platform import (
     begin_group_exclusive_activity,
+    is_group_owned_gate_holder,
     needs_group_host_bot_gate,
     release_group_owned_gate_sync,
 )
-from pallas.api.platform import is_group_owned_gate_holder
 
 from .coord_store import (
     GAME_SNAPSHOT_KEY,
@@ -97,9 +97,7 @@ def resolve_game_sync(group_id: int) -> Game | None:
 
 async def begin_spy_room(group_id: int) -> SpyRoomGate:
     gid = group_key(group_id)
-    return await begin_group_exclusive_activity(
-        "spy_group", gid, has_local=gid in games
-    )
+    return await begin_group_exclusive_activity("spy_group", gid, has_local=gid in games)
 
 
 def close_spy_room(group_id: int) -> None:

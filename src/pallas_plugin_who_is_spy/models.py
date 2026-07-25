@@ -58,9 +58,7 @@ class Game:
         return all(self.players[uid].has_spoken_this_round for uid in alive)
 
     def alive_not_spoken_count(self) -> int:
-        return sum(
-            1 for uid in self.alive_ids() if not self.players[uid].has_spoken_this_round
-        )
+        return sum(1 for uid in self.alive_ids() if not self.players[uid].has_spoken_this_round)
 
     def alive_players(self) -> list[Player]:
         return [player for player in self.players.values() if player.is_alive]
@@ -69,20 +67,15 @@ class Game:
         return [player.uid for player in self.alive_players()]
 
     def undercovers_alive(self) -> int:
-        return sum(
-            player.is_alive and player.is_undercover for player in self.players.values()
-        )
+        return sum(player.is_alive and player.is_undercover for player in self.players.values())
 
     def civilians_alive(self) -> int:
         return sum(
-            player.is_alive and not player.is_undercover and not player.is_blank
-            for player in self.players.values()
+            player.is_alive and not player.is_undercover and not player.is_blank for player in self.players.values()
         )
 
     def blanks_alive(self) -> int:
-        return sum(
-            player.is_alive and player.is_blank for player in self.players.values()
-        )
+        return sum(player.is_alive and player.is_blank for player in self.players.values())
 
     def is_game_over(self) -> str | None:
         undercover_count = self.undercovers_alive()

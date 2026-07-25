@@ -4,16 +4,16 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, PrivateMessa
 from nonebot.adapters.onebot.v11.permission import GROUP, PRIVATE
 from nonebot.params import CommandArg
 from nonebot.rule import Rule
-
 from pallas.api.perm import group_message_permission_for_command
-from pallas.api.platform import message_at_fleet_bot
 from pallas.api.platform import (
     bind_group_owned_gate,
     claim_group_message_event,
     is_group_owned_gate_holder,
+    message_at_fleet_bot,
     needs_group_host_bot_gate,
     try_acquire_group_broadcast_slot,
 )
+from pallas.api.utils import group_temp_private_group_id, reply_private_message
 from pallas.core.platform.shard.coord.spy_activity import SPY_OWNED_PLUGIN
 
 from .args import parse_start_args
@@ -125,9 +125,7 @@ cmd_open = on_command(
 )
 cmd_join = on_command(CMD_JOIN, block=True, priority=10, permission=JOIN_PERM)
 cmd_quit = on_command(CMD_QUIT, block=True, priority=10, permission=JOIN_PERM)
-cmd_start = on_command(
-    CMD_START, aliases={"牛牛开始"}, block=True, priority=10, permission=START_PERM
-)
+cmd_start = on_command(CMD_START, aliases={"牛牛开始"}, block=True, priority=10, permission=START_PERM)
 cmd_vote = on_command(CMD_VOTE, block=True, priority=10, permission=START_PERM)
 cmd_status = on_command(CMD_STATUS, block=True, priority=10, permission=STATUS_PERM)
 cmd_end = on_command(CMD_END, block=True, priority=5, permission=END_PERM)
@@ -159,9 +157,7 @@ async def claim_group_event(event: GroupMessageEvent) -> bool:
     return True
 
 
-async def can_close_spy_room(
-    bot: Bot, event: GroupMessageEvent, game: Game | None
-) -> bool:
+async def can_close_spy_room(bot: Bot, event: GroupMessageEvent, game: Game | None) -> bool:
     user_id = event.user_id
     if game is not None and user_id == game.owner_id:
         return True
@@ -200,20 +196,14 @@ async def handle_open(bot: Bot, event: GroupMessageEvent) -> None:
     persist_prep(game)
 
     if needs_group_host_bot_gate():
-        await bind_group_owned_gate(
-            PLUGIN_KEY, gid, int(bot.self_id), gate_sec=SPY_HOST_GATE_SEC
-        )
+        await bind_group_owned_gate(PLUGIN_KEY, gid, int(bot.self_id), gate_sec=SPY_HOST_GATE_SEC)
     mark_spy_prep_room(gid, owner_id=user_id, host_bot_id=int(bot.self_id))
     bot_id = int(bot.self_id)
     if await try_acquire_group_broadcast_slot(PLUGIN_KEY, gid, ttl_sec=3.0):
-        await cmd_open.finish(
-            open_room_message(user_id=user_id, min_players=cfg.spy_min_players)
-        )
+        await cmd_open.finish(open_room_message(user_id=user_id, min_players=cfg.spy_min_players))
         return
     if await is_group_owned_gate_holder(PLUGIN_KEY, gid, bot_id):
-        await cmd_open.finish(
-            open_room_message(user_id=user_id, min_players=cfg.spy_min_players)
-        )
+        await cmd_open.finish(open_room_message(user_id=user_id, min_players=cfg.spy_min_players))
 
 
 @cmd_join.handle()
@@ -262,9 +252,7 @@ async def handle_quit(event: GroupMessageEvent) -> None:
 
 
 @cmd_start.handle()
-async def handle_start(
-    bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()
-) -> None:  # noqa: B008
+async def handle_start(bot: Bot, event: GroupMessageEvent, arg: Message = CommandArg()) -> None:
     if not await claim_group_event(event):
         return
 
@@ -280,9 +268,7 @@ async def handle_start(
         await cmd_start.finish(err_already_dealt())
     player_count = len(game.players)
     if player_count < cfg.spy_min_players:
-        await cmd_start.finish(
-            err_not_enough_players(cfg.spy_min_players, player_count)
-        )
+        await cmd_start.finish(err_not_enough_players(cfg.spy_min_players, player_count))
     if not WORD_BANK:
         await cmd_start.finish(err_empty_word_bank())
 
@@ -439,6 +425,20 @@ def is_waiting_pm_vote(event: PrivateMessageEvent) -> bool:
     text = str(event.get_plaintext() or "").strip()
     if not text.isdigit():
         return False
+    gid = group_temp_private_group_id(event)
+    for game in resolve_all_active_games():
+        if game.group_id != gid and gid is not None:
+            continue
+        if (
+            game.ready
+            and user_id in game.players
+            and game.players[user_id].is_alive
+            and user_id in game.expecting_pm_vote
+            and game.vote_round_tag == game.round_no
+        ):
+            return True
+    if gid is not None:
+        return False
     for game in resolve_all_active_games():
         if (
             game.ready
@@ -470,9 +470,12 @@ pm_numeric_vote = on_message(
 async def handle_pm_vote(bot: Bot, event: PrivateMessageEvent) -> None:
     user_id = event.user_id
     number = int(event.get_plaintext().strip())
+    temp_gid = group_temp_private_group_id(event)
 
     game: Game | None = None
     for candidate in resolve_all_active_games():
+        if temp_gid is not None and candidate.group_id != temp_gid:
+            continue
         if (
             candidate.ready
             and user_id in candidate.players
@@ -483,7 +486,9 @@ async def handle_pm_vote(bot: Bot, event: PrivateMessageEvent) -> None:
             game = candidate
             break
     if not game:
-        await pm_numeric_vote.finish(pm_no_vote_pending())
+        await reply_private_message(bot, event, pm_no_vote_pending())
+        await pm_numeric_vote.finish()
+        return
 
     index_map = build_index_map(game)
     inverse = dict(index_map.items())
@@ -491,38 +496,49 @@ async def handle_pm_vote(bot: Bot, event: PrivateMessageEvent) -> None:
     if number == 0:
         async with game.lock:
             if user_id in game.votes:
-                await pm_numeric_vote.finish(pm_already_voted())
+                await reply_private_message(bot, event, pm_already_voted())
+                await pm_numeric_vote.finish()
+                return
             if not is_voting_phase(game):
-                await pm_numeric_vote.finish(pm_cannot_abstain_yet())
+                await reply_private_message(bot, event, pm_cannot_abstain_yet())
+                await pm_numeric_vote.finish()
+                return
             game.votes[user_id] = None
             sync_active_game(game)
             all_done = set(game.votes.keys()) >= set(game.alive_ids())
-        await pm_numeric_vote.send(vote_abstained())
+        await reply_private_message(bot, event, vote_abstained())
         if all_done:
             await settle_and_announce(bot, game)
+        await pm_numeric_vote.finish()
         return
 
     if number not in inverse:
         tips = pm_invalid_index(render_alive_numbered(game))
-        await pm_numeric_vote.finish(tips)
+        await reply_private_message(bot, event, tips)
+        await pm_numeric_vote.finish()
+        return
 
     target_user_id = inverse[number]
 
     async with game.lock:
         if user_id in game.votes:
-            await pm_numeric_vote.finish(pm_already_voted())
+            await reply_private_message(bot, event, pm_already_voted())
+            await pm_numeric_vote.finish()
+            return
         if not is_voting_phase(game):
-            await pm_numeric_vote.finish(pm_cannot_vote_yet())
-        if (
-            target_user_id not in game.players
-            or not game.players[target_user_id].is_alive
-        ):
-            await pm_numeric_vote.finish(pm_target_gone())
+            await reply_private_message(bot, event, pm_cannot_vote_yet())
+            await pm_numeric_vote.finish()
+            return
+        if target_user_id not in game.players or not game.players[target_user_id].is_alive:
+            await reply_private_message(bot, event, pm_target_gone())
+            await pm_numeric_vote.finish()
+            return
         game.votes[user_id] = target_user_id
         persist_game(game)
         voted_name = game.players[target_user_id].nickname
         all_done = set(game.votes.keys()) >= set(game.alive_ids())
 
-    await pm_numeric_vote.send(vote_recorded(voted_name))
+    await reply_private_message(bot, event, vote_recorded(voted_name))
     if all_done:
         await settle_and_announce(bot, game)
+    await pm_numeric_vote.finish()

@@ -76,9 +76,7 @@ def delivery_report(*, email_users: list[str], failed_users: list[str]) -> str:
     if email_users:
         lines.append("以下改走邮箱：" + "、".join(email_users))
     if failed_users:
-        lines.append(
-            "以下私聊未达：" + "、".join(failed_users) + "（请先私聊牛牛一次或加好友）"
-        )
+        lines.append("以下私聊未达：" + "、".join(failed_users) + "（请先私聊牛牛一次或加好友）")
     return "\n".join(lines)
 
 

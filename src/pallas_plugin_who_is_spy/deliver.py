@@ -1,4 +1,4 @@
-"""向玩家投递词语/投票说明：好友私聊 → 群临时会话 → QQ 邮箱。"""
+"""向玩家投递词语/投票说明：群临时会话 → 好友私聊 → QQ 邮箱。"""
 
 from __future__ import annotations
 
@@ -11,8 +11,12 @@ from nonebot.adapters.onebot.v11.exception import (
     ApiNotAvailable,
     NetworkError,
 )
-
-from pallas.api.utils import MailConfig, build_mail_config, send_mail
+from pallas.api.utils import (
+    MailConfig,
+    build_mail_config,
+    send_mail,
+    send_private_msg_compat,
+)
 
 from .config import get_spy_config
 
@@ -21,9 +25,6 @@ if TYPE_CHECKING:
 
 DeliveryChannel = Literal["private", "temp", "email", "failed"]
 _SEND_ERRORS = (ActionFailed, ApiNotAvailable, NetworkError)
-
-# 未加好友时好友私聊与群临时会话常不可用；非好友须玩家先私聊牛牛。
-_temp_session_ok: dict[int, bool | None] = {}
 
 
 def qq_mail(user_id: int) -> str:
@@ -46,14 +47,9 @@ class DeliveryOutcome:
     ok: bool
 
 
-async def send_private(
-    bot: Bot, user_id: int, message: str, *, group_id: int | None = None
-) -> bool:
-    payload: dict = {"user_id": int(user_id), "message": message}
-    if group_id is not None:
-        payload["group_id"] = int(group_id)
+async def send_private(bot: Bot, user_id: int, message: str, *, group_id: int | None = None) -> bool:
     try:
-        await bot.call_api("send_private_msg", **payload)
+        await send_private_msg_compat(bot, user_id, message, group_id=group_id)
         return True
     except _SEND_ERRORS as err:
         logger.debug(
@@ -86,21 +82,11 @@ async def deliver_player_message(
     email_subject: str,
     email_body: str,
 ) -> DeliveryOutcome:
-    bot_id = int(bot.self_id)
+    if await send_private(bot, user_id, private_text, group_id=group_id):
+        return DeliveryOutcome("temp", True)
 
     if await send_private(bot, user_id, private_text):
         return DeliveryOutcome("private", True)
-
-    temp_known = _temp_session_ok.get(bot_id)
-    if temp_known is not False:
-        if await send_private(bot, user_id, private_text, group_id=group_id):
-            _temp_session_ok[bot_id] = True
-            return DeliveryOutcome("temp", True)
-        _temp_session_ok[bot_id] = False
-        logger.info(
-            "who_is_spy: bot {} 非好友私聊/临时会话不可用，将尝试 QQ 邮箱",
-            bot_id,
-        )
 
     if await send_email(user_id, subject=email_subject, body=email_body):
         return DeliveryOutcome("email", True)

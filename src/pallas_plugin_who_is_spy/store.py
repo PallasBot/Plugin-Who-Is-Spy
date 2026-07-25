@@ -5,7 +5,6 @@ import shutil
 from pathlib import Path
 
 from nonebot import logger
-
 from pallas.api.paths import plugin_data_dir, resource_dir
 
 DEFAULT_WORD_FILE = resource_dir("who_is_spy") / "undercover_words.json"
@@ -20,9 +19,7 @@ def ensure_word_file() -> Path:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not WORD_FILE.exists() and DEFAULT_WORD_FILE.is_file():
         shutil.copyfile(DEFAULT_WORD_FILE, WORD_FILE)
-        logger.info(
-            "who_is_spy: seeded word bank from {} to {}", DEFAULT_WORD_FILE, WORD_FILE
-        )
+        logger.info("who_is_spy: seeded word bank from {} to {}", DEFAULT_WORD_FILE, WORD_FILE)
     return WORD_FILE
 
 
@@ -61,15 +58,11 @@ def sync_word_file() -> int:
     """合并 data 词库与内置 resource，补全缺失词对并写回 data。"""
     ensure_word_file()
     data_pairs = read_word_pairs(WORD_FILE)
-    resource_pairs = (
-        read_word_pairs(DEFAULT_WORD_FILE) if DEFAULT_WORD_FILE.is_file() else []
-    )
+    resource_pairs = read_word_pairs(DEFAULT_WORD_FILE) if DEFAULT_WORD_FILE.is_file() else []
     merged = merge_word_pairs(data_pairs, resource_pairs)
     if len(merged) > len(data_pairs):
         payload = [[a, b] for a, b in merged]
-        WORD_FILE.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        WORD_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         logger.info(
             "who_is_spy: merged word bank {} -> {} pairs (resource had {} new)",
             len(data_pairs),
@@ -129,9 +122,7 @@ def record_recent_word_pair(group_id: int, a: str, b: str, *, keep: int) -> None
         return
     entries.append(pair)
     raw[key] = entries[-keep:]
-    RECENT_WORDS_FILE.write_text(
-        json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    RECENT_WORDS_FILE.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def init_store() -> None:
