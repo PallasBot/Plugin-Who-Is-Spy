@@ -71,6 +71,7 @@ __plugin_meta__ = PluginMetadata(
                 description="开一局谁是卧底房间。用户要玩卧底、开房时使用。",
                 parameters={"type": "object", "properties": {}},
                 command_template="牛牛卧底",
+                hints=["卧底", "谁是卧底", "开房", "玩卧底"],
             ),
             llm_command_tool_row(
                 name="who_is_spy.join",
@@ -78,6 +79,7 @@ __plugin_meta__ = PluginMetadata(
                 description="加入筹备中的卧底房间。",
                 parameters={"type": "object", "properties": {}},
                 command_template="牛牛加入",
+                hints=["加入卧底", "加入房间"],
             ),
             llm_command_tool_row(
                 name="who_is_spy.start",
@@ -85,6 +87,7 @@ __plugin_meta__ = PluginMetadata(
                 description="房主发身份开局。用户说发身份、开始时使用。",
                 parameters={"type": "object", "properties": {}},
                 command_template="牛牛发身份",
+                hints=["发身份", "开始卧底"],
             ),
             llm_command_tool_row(
                 name="who_is_spy.vote",
@@ -92,6 +95,7 @@ __plugin_meta__ = PluginMetadata(
                 description="房主提前开始投票。",
                 parameters={"type": "object", "properties": {}},
                 command_template="牛牛投票",
+                hints=["开始投票", "投票"],
             ),
             llm_command_tool_row(
                 name="who_is_spy.status",
@@ -99,6 +103,7 @@ __plugin_meta__ = PluginMetadata(
                 description="查看当前卧底局势。",
                 parameters={"type": "object", "properties": {}},
                 command_template="牛牛局势",
+                hints=["局势", "卧底局势"],
             ),
             llm_command_tool_row(
                 name="who_is_spy.end",
@@ -106,6 +111,7 @@ __plugin_meta__ = PluginMetadata(
                 description="结束当前卧底房间。",
                 parameters={"type": "object", "properties": {}},
                 command_template="牛牛结束",
+                hints=["结束卧底", "结束房间"],
             ),
         ],
         "hosted_activity_ingress": {
