@@ -5,6 +5,10 @@
 
 ## [Unreleased]
 
+## [4.0.18] - 2026-07-26
+
+- feat(llm_tools): 为口令工具补充口语 hints
+
 ## [4.0.17] - 2026-07-26
 
 - feat(config): WebUI 配置字段增加 ui_group 分组与 ui_order 排序
