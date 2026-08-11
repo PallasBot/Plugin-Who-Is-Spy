@@ -1,6 +1,6 @@
 [project]
 name = "pallas-plugin-who-is-spy"
-version = "4.0.19"
+version = "4.0.20"
 description = "Pallas-Bot 官方扩展：多牛分片谁是卧底。"
 readme = "README.md"
 license = { file = "LICENSE" }
