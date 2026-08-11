@@ -311,8 +311,8 @@ async def settle_and_announce(bot: Bot, game: Game) -> None:
     logger.info(
         format_plugin_event(
             "spy_eliminate",
-            f"Bot [{bot.self_id}] eliminated user [{eliminated}] in group [{group_id}] "
-            f"(round={game.round_no}, role={role})",
+            f"Bot [{bot.self_id}] eliminated user [{eliminated}] in group [{group_id}], "
+            f"round [{game.round_no}], role [{role}]",
         )
     )
     game_over = game.is_game_over()
@@ -320,7 +320,7 @@ async def settle_and_announce(bot: Bot, game: Game) -> None:
         logger.info(
             format_plugin_event(
                 "spy_end",
-                f"Bot [{bot.self_id}] spy game in group [{group_id}] ended ({game_over})",
+                f"Bot [{bot.self_id}] spy game in group [{group_id}] ended by {game_over.rstrip('。')}",
             )
         )
         undercover_names = [player.nickname for player in game.players.values() if player.is_undercover]

@@ -307,8 +307,8 @@ async def handle_start(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     logger.info(
         format_plugin_event(
             "spy_start",
-            f"Bot [{bot.self_id}] started a spy game in group [{event.group_id}] "
-            f"(players={player_count}, undercover={undercover_count}, blank={blank_count})",
+            f"Bot [{bot.self_id}] started a [{player_count}] players spy game in group [{event.group_id}], "
+            f"undercover [{undercover_count}], blank [{blank_count}]",
         )
     )
 
