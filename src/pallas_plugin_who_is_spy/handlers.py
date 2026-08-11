@@ -4,6 +4,7 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, PrivateMessa
 from nonebot.adapters.onebot.v11.permission import GROUP, PRIVATE
 from nonebot.params import CommandArg
 from nonebot.rule import Rule
+from pallas.api.logging import format_plugin_event
 from pallas.api.perm import group_message_permission_for_command
 from pallas.api.platform import (
     bind_group_owned_gate,
@@ -194,6 +195,12 @@ async def handle_open(bot: Bot, event: GroupMessageEvent) -> None:
     nick = await get_nickname(bot, gid, user_id)
     game.players[user_id] = Player(uid=user_id, nickname=nick)
     persist_prep(game)
+    logger.info(
+        format_plugin_event(
+            "spy_open",
+            f"Bot [{bot.self_id}] opened a spy room in group [{event.group_id}] (owner=[{user_id}])",
+        )
+    )
 
     if needs_group_host_bot_gate():
         await bind_group_owned_gate(PLUGIN_KEY, gid, int(bot.self_id), gate_sec=SPY_HOST_GATE_SEC)
@@ -296,6 +303,14 @@ async def handle_start(bot: Bot, event: GroupMessageEvent, arg: Message = Comman
     persist_game(game)
 
     email_names, failed_names = await deliver_role_words(bot, game, show_role=show_role)
+
+    logger.info(
+        format_plugin_event(
+            "spy_start",
+            f"Bot [{bot.self_id}] started a spy game in group [{event.group_id}] "
+            f"(players={player_count}, undercover={undercover_count}, blank={blank_count})",
+        )
+    )
 
     msg = start_game_hint(numbered=render_alive_numbered(game), round_no=game.round_no)
     extra = delivery_report(email_users=email_names, failed_users=failed_names)
@@ -403,6 +418,12 @@ async def handle_end(bot: Bot, event: GroupMessageEvent) -> None:
         if not await can_close_spy_room(bot, event, game):
             await cmd_end.finish(err_end_owner_only())
         close_spy_room(gid)
+        logger.info(
+            format_plugin_event(
+                "spy_close",
+                f"Bot [{event.self_id}] closed a spy room in group [{event.group_id}]",
+            )
+        )
         await cmd_end.finish(
             room_closed(
                 civilian_word=game.word_civilian if game.ready else "",
@@ -414,6 +435,12 @@ async def handle_end(bot: Bot, event: GroupMessageEvent) -> None:
     lock = SPY_GROUP_LOCK.read(gid)
     if lock and lock.get("busy") and await can_close_spy_room(bot, event, None):
         close_spy_room(gid)
+        logger.info(
+            format_plugin_event(
+                "spy_close",
+                f"Bot [{event.self_id}] closed a spy room in group [{event.group_id}]",
+            )
+        )
         await cmd_end.finish(room_closed())
         return
 

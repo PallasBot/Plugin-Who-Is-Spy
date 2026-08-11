@@ -4,6 +4,8 @@ import asyncio
 import random
 from typing import TYPE_CHECKING
 
+from nonebot import logger
+from pallas.api.logging import format_plugin_event
 from pallas.api.platform import (
     needs_group_host_bot_gate,
     release_group_owned_gate_sync,
@@ -306,8 +308,21 @@ async def settle_and_announce(bot: Bot, game: Game) -> None:
     game.players[eliminated].is_alive = False
     eliminated_player = game.players[eliminated]
     role = player_role_label(eliminated_player)
+    logger.info(
+        format_plugin_event(
+            "spy_eliminate",
+            f"Bot [{bot.self_id}] eliminated user [{eliminated}] in group [{group_id}] "
+            f"(round={game.round_no}, role={role})",
+        )
+    )
     game_over = game.is_game_over()
     if game_over:
+        logger.info(
+            format_plugin_event(
+                "spy_end",
+                f"Bot [{bot.self_id}] spy game in group [{group_id}] ended ({game_over})",
+            )
+        )
         undercover_names = [player.nickname for player in game.players.values() if player.is_undercover]
         blank_names = [player.nickname for player in game.players.values() if player.is_blank]
         summary = game_win_summary(

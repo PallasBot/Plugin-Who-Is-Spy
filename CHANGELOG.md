@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- feat(logging): 补充卧底房间、对局与淘汰胜负业务事件日志
+
 ## [4.0.18] - 2026-07-26
 
 - feat(llm_tools): 为口令工具补充口语 hints
