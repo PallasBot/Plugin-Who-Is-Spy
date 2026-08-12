@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 
 from nonebot import logger
+from pallas.api.logging import format_plugin_event
 from pallas.api.paths import plugin_data_dir, resource_dir
 
 DEFAULT_WORD_FILE = resource_dir("who_is_spy") / "undercover_words.json"
@@ -19,7 +20,12 @@ def ensure_word_file() -> Path:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not WORD_FILE.exists() and DEFAULT_WORD_FILE.is_file():
         shutil.copyfile(DEFAULT_WORD_FILE, WORD_FILE)
-        logger.info("who_is_spy: seeded word bank from {} to {}", DEFAULT_WORD_FILE, WORD_FILE)
+        logger.info(
+            format_plugin_event(
+                "word_bank_seeded",
+                f"Word bank seeded from [{DEFAULT_WORD_FILE}] to [{WORD_FILE}]",
+            )
+        )
     return WORD_FILE
 
 
@@ -30,7 +36,12 @@ def read_word_pairs(path: Path | str) -> list[tuple[str, str]]:
     try:
         data = json.loads(target.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        logger.warning("who_is_spy: load word bank failed path={} err={}", target, exc)
+        logger.warning(
+            format_plugin_event(
+                "word_bank_load_failed",
+                f"Word bank load failed from [{target}]: {exc}",
+            )
+        )
         return []
 
     pairs: list[tuple[str, str]] = []
@@ -64,10 +75,11 @@ def sync_word_file() -> int:
         payload = [[a, b] for a, b in merged]
         WORD_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         logger.info(
-            "who_is_spy: merged word bank {} -> {} pairs (resource had {} new)",
-            len(data_pairs),
-            len(merged),
-            len(merged) - len(data_pairs),
+            format_plugin_event(
+                "word_bank_merged",
+                f"Word bank merged [{len(data_pairs)}] -> [{len(merged)}] pairs, "
+                f"resource added [{len(merged) - len(data_pairs)}]",
+            )
         )
     return len(merged)
 
@@ -129,4 +141,9 @@ def init_store() -> None:
     sync_word_file()
     loaded = load_words_from_json(WORD_FILE)
     if loaded:
-        logger.info("who_is_spy: loaded {} word pairs from {}", loaded, WORD_FILE)
+        logger.info(
+            format_plugin_event(
+                "word_bank_ready",
+                f"Loaded [{loaded}] word pairs from [{WORD_FILE}]",
+            )
+        )
