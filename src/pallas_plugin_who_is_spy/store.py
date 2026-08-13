@@ -23,7 +23,7 @@ def ensure_word_file() -> Path:
         logger.info(
             format_plugin_event(
                 "word_bank_seeded",
-                f"Word bank seeded from [{DEFAULT_WORD_FILE}] to [{WORD_FILE}]",
+                f"词库初始化完成，内置词库 [{DEFAULT_WORD_FILE}] 已复制到 [{WORD_FILE}]",
             )
         )
     return WORD_FILE
@@ -39,7 +39,7 @@ def read_word_pairs(path: Path | str) -> list[tuple[str, str]]:
         logger.warning(
             format_plugin_event(
                 "word_bank_load_failed",
-                f"Word bank load failed from [{target}]: {exc}",
+                f"词库加载失败，文件 [{target}]：{exc}",
             )
         )
         return []
@@ -77,8 +77,8 @@ def sync_word_file() -> int:
         logger.info(
             format_plugin_event(
                 "word_bank_merged",
-                f"Word bank merged [{len(data_pairs)}] -> [{len(merged)}] pairs, "
-                f"resource added [{len(merged) - len(data_pairs)}]",
+                f"词库合并完成，[{len(data_pairs)}] -> [{len(merged)}] 词对，"
+                f"内置补充 [{len(merged) - len(data_pairs)}]",
             )
         )
     return len(merged)
@@ -144,6 +144,6 @@ def init_store() -> None:
         logger.info(
             format_plugin_event(
                 "word_bank_ready",
-                f"Loaded [{loaded}] word pairs from [{WORD_FILE}]",
+                f"词库就绪，已加载 [{loaded}] 个词对（[{WORD_FILE}]）",
             )
         )

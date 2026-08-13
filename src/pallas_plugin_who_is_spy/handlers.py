@@ -148,7 +148,7 @@ async def claim_group_event(event: GroupMessageEvent) -> bool:
     )
     if not claimed:
         logger.warning(
-            "who_is_spy: claim lost bot={} group={} user={} text={!r}",
+            "Bot [{}] lost the message claim in group [{}] (user [{}], text [{!r}])",
             event.self_id,
             event.group_id,
             event.user_id,
@@ -234,6 +234,13 @@ async def handle_join(bot: Bot, event: GroupMessageEvent) -> None:
     nick = await get_nickname(bot, gid, user_id)
     game.players[user_id] = Player(uid=user_id, nickname=nick)
     persist_prep(game)
+    logger.info(
+        format_plugin_event(
+            "spy_join",
+            f"Bot [{bot.self_id}] user [{user_id}] joined the spy room in group [{event.group_id}], "
+            f"now [{len(game.players)}] players",
+        )
+    )
     await cmd_join.finish(join_ok(len(game.players)))
 
 
@@ -255,6 +262,13 @@ async def handle_quit(event: GroupMessageEvent) -> None:
         await cmd_quit.finish(err_owner_cannot_quit())
     del game.players[user_id]
     persist_prep(game)
+    logger.info(
+        format_plugin_event(
+            "spy_quit",
+            f"Bot [{event.self_id}] user [{user_id}] quit the spy room in group [{event.group_id}], "
+            f"remaining [{len(game.players)}] players",
+        )
+    )
     await cmd_quit.finish(quit_ok(len(game.players)))
 
 

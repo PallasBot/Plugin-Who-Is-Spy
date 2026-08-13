@@ -269,6 +269,13 @@ async def settle_and_announce(bot: Bot, game: Game) -> None:
         await bot.send_group_msg(group_id=group_id, message=vote_all_abstain())
         game.reset_round_flags()
         sync_active_game(game)
+        logger.info(
+            format_plugin_event(
+                "spy_round_start",
+                f"Bot [{bot.self_id}] started round [{game.round_no}] in group [{group_id}], "
+                f"alive [{len(game.alive_ids())}]",
+            )
+        )
         await bot.send_group_msg(
             group_id=group_id,
             message=round_start(round_no=game.round_no, numbered=render_alive_numbered(game)),
@@ -298,6 +305,13 @@ async def settle_and_announce(bot: Bot, game: Game) -> None:
         await bot.send_group_msg(group_id=group_id, message=vote_tie())
         game.reset_round_flags()
         sync_active_game(game)
+        logger.info(
+            format_plugin_event(
+                "spy_round_start",
+                f"Bot [{bot.self_id}] started round [{game.round_no}] in group [{group_id}], "
+                f"alive [{len(game.alive_ids())}]",
+            )
+        )
         await bot.send_group_msg(
             group_id=group_id,
             message=round_start(round_no=game.round_no, numbered=render_alive_numbered(game)),
@@ -364,6 +378,13 @@ async def settle_and_announce(bot: Bot, game: Game) -> None:
     )
     game.reset_round_flags()
     sync_active_game(game)
+    logger.info(
+        format_plugin_event(
+            "spy_round_start",
+            f"Bot [{bot.self_id}] started round [{game.round_no}] in group [{group_id}], "
+            f"alive [{len(game.alive_ids())}]",
+        )
+    )
     await bot.send_group_msg(
         group_id=group_id,
         message=round_start(round_no=game.round_no, numbered=render_alive_numbered(game)),

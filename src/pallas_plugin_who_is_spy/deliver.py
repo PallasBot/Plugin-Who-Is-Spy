@@ -53,7 +53,7 @@ async def send_private(bot: Bot, user_id: int, message: str, *, group_id: int | 
         return True
     except _SEND_ERRORS as err:
         logger.debug(
-            "who_is_spy: send_private failed bot={} user={} group={} err={}",
+            "Bot [{}] failed to send a private message to user [{}] (group [{}]): {}",
             bot.self_id,
             user_id,
             group_id,
