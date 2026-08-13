@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 from nonebot import logger
-from pallas.api.logging import format_plugin_event
+from pallas.api.logging import format_plugin_event, register_plugin_startup_ready
 from pallas.api.paths import plugin_data_dir, resource_dir
 
 DEFAULT_WORD_FILE = resource_dir("who_is_spy") / "undercover_words.json"
@@ -141,9 +141,7 @@ def init_store() -> None:
     sync_word_file()
     loaded = load_words_from_json(WORD_FILE)
     if loaded:
-        logger.info(
-            format_plugin_event(
-                "word_bank_ready",
-                f"词库就绪，已加载 [{loaded}] 个词对（[{WORD_FILE}]）",
-            )
+        register_plugin_startup_ready(
+            "who_is_spy",
+            detail=f"词库就绪，已加载 [{loaded}] 个词对（[{WORD_FILE}]）",
         )
