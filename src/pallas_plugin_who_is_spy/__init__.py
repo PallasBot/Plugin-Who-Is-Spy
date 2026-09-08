@@ -125,6 +125,7 @@ __plugin_meta__ = PluginMetadata(
         "menu_data": [
             {
                 "func": CMD_OPEN,
+                "group": "开房与准备",
                 "trigger_method": "on_cmd",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": f"{CMD_OPEN} / 牛牛谁是卧底",
@@ -139,6 +140,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": f"{CMD_JOIN} / {CMD_QUIT}",
+                "group": "开房与准备",
                 "trigger_method": "on_cmd",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": f"{CMD_JOIN} / {CMD_QUIT}",
@@ -152,6 +154,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": CMD_START,
+                "group": "开房与准备",
                 "trigger_method": "on_cmd",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": f"{CMD_START} / 牛牛开始 [潜藏人数] [白板] [暗牌|明牌]",
@@ -171,6 +174,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": "@牛牛 述词",
+                "group": "对局流程",
                 "trigger_method": "on_message",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": "讨论阶段 @牛牛 并附带描述文本",
@@ -185,6 +189,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": CMD_VOTE,
+                "group": "投票与结束",
                 "trigger_method": "on_cmd",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": CMD_VOTE,
@@ -199,6 +204,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": CMD_STATUS,
+                "group": "对局流程",
                 "trigger_method": "on_cmd",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": CMD_STATUS,
@@ -210,6 +216,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": CMD_END,
+                "group": "投票与结束",
                 "trigger_method": "on_cmd",
                 "trigger_scene": SCENE_GROUP,
                 "trigger_condition": CMD_END,
@@ -222,6 +229,7 @@ __plugin_meta__ = PluginMetadata(
             },
             {
                 "func": "私聊投票",
+                "group": "投票与结束",
                 "trigger_method": "on_message",
                 "trigger_scene": SCENE_PRIVATE,
                 "trigger_condition": "投票阶段私聊回复数字序次（0=弃权）",
