@@ -8,11 +8,15 @@ requires-python = ">=3.12,<4.0"
 dependencies = [
     "nonebot2>=2.4.0",
     "nonebot-adapter-onebot>=2.4.6",
+    "anyio>=4.14.2",
+    "msgpack>=1.2.1",
+    "multidict>=6.9.1",
 ]
 
 [dependency-groups]
 dev = [
     "ruff>=0.16.0",
+    "pytest>=8.0",
 ]
 
 [build-system]
@@ -33,3 +37,15 @@ pallas-plugin-who-is-spy = ['pallas_plugin_who_is_spy']
 [tool.nonebot.adapters]
 "@local" = []
 nonebot-adapter-onebot = [{ name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }]
+
+# 传递依赖安全下限。
+[tool.uv]
+constraint-dependencies = [
+    "anyio>=4.14.2",
+    "msgpack>=1.2.1",
+    "multidict>=6.9.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"

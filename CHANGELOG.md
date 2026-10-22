@@ -3,6 +3,10 @@
 本文件依据 git tag 历史整理，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
 新提交合入后请在 `## [Unreleased]` 下记录，发布时随版本 tag 归档。
 
+## [Unreleased]
+
+- fix(deps): 将 anyio/msgpack/multidict 运行时安全下限写入发布依赖 metadata
+
 ## [4.0.24] - 2026-09-08
 
 - 帮助菜单中的卧底玩法按开房与准备、对局流程、投票与结束分组显示
